@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,6 +12,7 @@ import (
 func main() {
 	var err error
 	var input []byte
+	var jsonData map[string]interface{}
 
 	if len(os.Args) == 1 {
 		input, err = ioutil.ReadAll(os.Stdin)
@@ -29,11 +31,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	json, err := yaml.YAMLToJSON(input)
+	jsonBytes, err := yaml.YAMLToJSON(input)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+	jsonString := string(jsonBytes)
+	json.Unmarshal([]byte(jsonString), &jsonData)
+	jsonIndented, err := json.MarshalIndent(jsonData, "", "    ")
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Print(string(json))
+	fmt.Print(string(jsonIndented))
 }
